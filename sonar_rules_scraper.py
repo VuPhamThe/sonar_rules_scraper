@@ -64,7 +64,7 @@ def extract_products(soup):
         if product_name:
             products.append(product_name)
 
-    return "| ".join(products)
+    return " | ".join(products)
 
 def parse_rule(url, retries=3):
     for attempt in range(retries):
@@ -140,7 +140,7 @@ def main():
         results = [f.result() for f in futures]
 
     merge_csv(results)
-    print("✅ Done! Saved to sonarqube_community_rules.csv")
+    print("Done! Saved to sonarqube_community_rules.csv")
 
 if __name__ == "__main__":
     main()
