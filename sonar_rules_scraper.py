@@ -25,6 +25,47 @@ def get_rule_links(lang):
         links.append(BASE_URL + a["href"])
     return links
 
+def extract_products(soup):
+    products = []
+
+    ul = soup.find("ul", class_=lambda c: c and "RuleAvailableInstyles__StyledList" in c)
+    if not ul:
+        return ""
+
+    for a in ul.select("li > a"):
+        href = a.get("href", "").lower()
+        img = a.find("img")
+        tooltip = a.find("span", class_=lambda c: c and "Tooltip" in (c or ""))
+        edition_box = a.find("div", class_=lambda c: c and "EditionBox" in (c or ""))
+
+        # --- product name ---
+        product_name = ""
+        if "sonarlint" in href:
+            product_name = "SonarLint"
+        elif "sonarcloud" in href:
+            product_name = "SonarCloud"
+        elif "community-edition" in href:
+            product_name = "SonarQube Community Edition"
+        elif "sonarqube" in href:
+            product_name = "SonarQube Server"
+        elif img and img.get("alt"):
+            product_name = img["alt"].strip()
+
+        # --- details (tooltip, edition info) ---
+        details = []
+        if tooltip:
+            details.append(" ".join(tooltip.stripped_strings))
+        if edition_box:
+            details.append(" ".join(edition_box.stripped_strings))
+
+        if details:
+            product_name += f" ({' - '.join(details)})"
+
+        if product_name:
+            products.append(product_name)
+
+    return "| ".join(products)
+
 def parse_rule(url, retries=3):
     for attempt in range(retries):
         try:
@@ -43,24 +84,7 @@ def parse_rule(url, retries=3):
                 rule_type = type_el.get_text(strip=True)
 
             # --- Available In ---
-            avail_links = soup.find_all("a", class_=lambda c: c and "RuleAvailableInstyles__StyledLinkToProduct" in c)
-            products = []
-            for a in avail_links:
-                img = a.find("img")
-                edition_box = a.find("div", class_=lambda c: c and "StyledEditionBox" in c)
-                tooltip = a.find("span", class_=lambda c: c and "RuleAvailableInstyles__StyledTooltip" in c)
-
-                if img and img.get("alt"):
-                    product_name = img["alt"].strip()
-                    if edition_box:
-                        edition_text = " ".join(edition_box.stripped_strings)
-                        product_name += f" ( {edition_text} )"
-                    elif tooltip:
-                        tooltip_text = " ".join(tooltip.stripped_strings)
-                        product_name += f" ( {tooltip_text} )"
-                    products.append(product_name)
-
-            available_in = "| ".join(products) if products else ""
+            available_in = extract_products(soup)
 
             return {
                 "Key": key,
