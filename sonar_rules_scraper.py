@@ -122,7 +122,7 @@ def process_language(lang):
         print(f"Error processing {lang}: {e}")
         return None
 
-def merge_csv(files, output="sonarqube_community_rules.csv"):
+def merge_csv(files, output="sonarqube_not_community_rules.csv"):
     with open(output, "w", newline="", encoding="utf-8") as fout:
         writer = csv.DictWriter(fout, fieldnames=FIELDS)
         writer.writeheader()
