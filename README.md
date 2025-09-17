@@ -24,6 +24,8 @@ pip install requests beautifulsoup4 tqdm
 python sonar_rules_scraper.py
 ```
 
+or use Codespaces of github
+
 ## Output
 
 -   `sonarqube_community_rules.csv` containing:
